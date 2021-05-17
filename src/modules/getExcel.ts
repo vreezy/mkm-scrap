@@ -1,66 +1,36 @@
-const excel = require('excel4node');
+import ExcelJS from 'exceljs';
 
-export const getExcel = (arr: string[][]) => {
-    // Create a new instance of a Workbook class
-    var workbook = new excel.Workbook();
+export const getExcel = async (arr: (string|number)[][]): Promise<boolean> => {
+   console.log("Starting Excel Work...");
+   const workbook = new ExcelJS.Workbook();
 
-    // Add Worksheets to the workbook
-    var worksheet = workbook.addWorksheet('Sheet 1');
-    // var worksheet2 = workbook.addWorksheet('Sheet 2');
+   const worksheet = workbook.addWorksheet('Cards');
 
-    // Create a reusable style
-    var style = workbook.createStyle({
-    font: {
-        color: '#000000',
-        size: 12
-    },
-    
-    numberFormat: ' 0.00 €;-0.00 €'
-    });
+   worksheet.columns = [
+      { header: 'Url', key: 'url', width: 20 },
+      { header: 'Verfügbare Artikel', key: 'articel', width: 16 },
+      { header: 'ab', key: 'price', width: 5 },
+      { header: 'Preis-Trend', key: 'pricetrend', width: 10 },
+      { header: '30-Tages-Durchschnitt', key: 'thirtydayavg', width: 10 },
+      { header: '7-Tages-Durchschnitt', key: 'sevendayavg', width: 10 },
+      { header: '1-Tages-Durchschnitt', key: '1dayavg', width: 10 },
+      { header: '1.', key: 'u1', width: 5 },
+      { header: '2.', key: 'u2', width: 5 },
+      { header: '3.', key: 'u3', width: 5 },
+      { header: '4.', key: 'u4', width: 5 },
+      { header: '5.', key: 'u5', width: 5 },
+   ];
+  
+   arr.forEach((row, rindex: number) => {
+      worksheet.addRow(row);
+   });
 
-    var styleInt = workbook.createStyle({
-    font: {
-        color: '#000000',
-        size: 12
-    },
-    numberFormat: '#'
-    });
-    
-
-    arr.forEach((row, rindex) => {
-    row.forEach((cell, cindex) => {
-        if(rindex === 0) {
-            worksheet.cell(rindex + 1, cindex + 1).string(cell).style(style);
-        }
-        else {
-            if(cindex === 0 || cindex === 2 || cindex === 3) {
-                worksheet.cell(rindex + 1, cindex + 1).string(cell).style(style);
-            }
-            else if (cindex === 1 || cindex === 4) {
-                worksheet.cell(rindex + 1, cindex + 1).number(parseInt(cell)).style(styleInt);
-            }
-            else {
-                const cellFloat = parseFloat(cell.replace(",", ".").replace(/[^0-9.]/g, ''))
-                worksheet.cell(rindex + 1, cindex + 1).number(cellFloat).style(style);
-            }
-        }
-
-    })
-    })
-    // // Set value of cell A1 to 100 as a number type styled with paramaters of style
-    // worksheet.cell(1,1).number(100).style(style);
-
-    // // Set value of cell B1 to 300 as a number type styled with paramaters of style
-    // worksheet.cell(1,2).number(200).style(style);
-
-    // // Set value of cell C1 to a formula styled with paramaters of style
-    // worksheet.cell(1,3).formula('A1 + B1').style(style);
-
-    // // Set value of cell A2 to 'string' styled with paramaters of style
-    // worksheet.cell(2,1).string('string').style(style);
-
-    // // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
-    // worksheet.cell(3,1).bool(true).style(style).style({font: {size: 14}});
-
-    workbook.write('Excel.xlsx');
+   try {
+      await workbook.xlsx.writeFile("excel.xlsx");
+      return Promise.resolve(true);
+   }
+   catch (e) {
+      console.log(e)
+   }
+   return Promise.resolve(false)
 }
